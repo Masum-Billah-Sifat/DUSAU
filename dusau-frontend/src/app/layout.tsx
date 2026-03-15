@@ -4,6 +4,7 @@ import { Plus_Jakarta_Sans, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import SiteNavbar from '@/components/site-navbar'
 import SiteFooter from '@/components/site-footer'
+import ScrollToTopButton from '@/components/scroll-to-top-button'
 import { siteConfig } from '@/data/store'
 
 const jakarta = Plus_Jakarta_Sans({
@@ -40,6 +41,7 @@ export default function RootLayout({
 
         <SiteNavbar />
         {children}
+        <ScrollToTopButton />
         <SiteFooter />
       </body>
     </html>
