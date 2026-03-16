@@ -71,7 +71,7 @@ export default function Hero() {
               </div>
             </div>
 
-            <div className="glass absolute -bottom-6 left-4 max-w-[230px] p-4 sm:-left-8 sm:max-w-[260px]">
+            {/* <div className="glass absolute -bottom-6 left-4 max-w-[230px] p-4 sm:-left-8 sm:max-w-[260px]">
               <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
                 {content.hero.annualCycleLabel}
               </p>
@@ -87,7 +87,7 @@ export default function Hero() {
               <p className="mt-2 text-sm leading-6 text-slate-200">
                 {content.hero.platformVisionText}
               </p>
-            </div>
+            </div> */}
           </div>
         </FadeIn>
       </div>
