@@ -1,21 +1,24 @@
+'use client'
+
 import { FadeIn, SectionHeading } from '@/components/ui'
-import { adminModules, committeeYears, events, homeStats } from '@/data/store'
+import { useLocalizedContent } from '@/hooks/use-locallized-content'
 
 export default function AdminDemoPage() {
-  const currentCommittee = committeeYears[0]
+  const { content } = useLocalizedContent()
+  const currentCommittee = content.committeeYears[0]
 
   return (
     <main className="page-shell">
       <section className="section-shell">
         <div className="container-app">
           <SectionHeading
-            eyebrow="Admin demo"
-            title="This is how the future dynamic side of DUSAU can look"
-            description="This page is still frontend-only, but it helps you show the organization how each new committee could manage content, people, and community data."
+            eyebrow={content.adminDemoPage.eyebrow}
+            title={content.adminDemoPage.title}
+            description={content.adminDemoPage.description}
           />
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {homeStats.map((stat, index) => (
+            {content.homeStats.map((stat, index) => (
               <FadeIn
                 key={stat.label}
                 delay={index * 0.06}
@@ -31,46 +34,54 @@ export default function AdminDemoPage() {
 
           <div className="mt-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
             <FadeIn className="glass-strong p-8">
-              <span className="pill">Committee control</span>
+              <span className="pill">{content.adminDemoPage.committeeEyebrow}</span>
               <h2 className="font-display mt-5 text-3xl font-semibold text-white">
-                Create a new committee year with one action
+                {content.adminDemoPage.committeeTitle}
               </h2>
               <p className="mt-5 text-base leading-8 text-slate-300">
-                This is one of the most important features for DUSAU. Every year,
-                a new committee should be able to take ownership, add roles,
-                assign members, and keep older years archived automatically.
+                {content.adminDemoPage.committeePara}
               </p>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
                 <div className="glass p-5">
-                  <p className="text-sm text-slate-400">Current year</p>
+                  <p className="text-sm text-slate-400">
+                    {content.adminDemoPage.currentYearLabel}
+                  </p>
                   <p className="mt-2 text-lg font-semibold text-white">
-                    {currentCommittee.year} Committee
+                    {currentCommittee.year}
                   </p>
                 </div>
                 <div className="glass p-5">
-                  <p className="text-sm text-slate-400">Current members</p>
+                  <p className="text-sm text-slate-400">
+                    {content.adminDemoPage.currentMembersLabel}
+                  </p>
                   <p className="mt-2 text-lg font-semibold text-white">
-                    {currentCommittee.members.length} shown in demo
+                    {currentCommittee.members.length}
+                    {content.adminDemoPage.currentMembersSuffix}
                   </p>
                 </div>
                 <div className="glass p-5">
-                  <p className="text-sm text-slate-400">Published events</p>
+                  <p className="text-sm text-slate-400">
+                    {content.adminDemoPage.publishedEventsLabel}
+                  </p>
                   <p className="mt-2 text-lg font-semibold text-white">
-                    {events.length} demo items
+                    {content.events.length}
+                    {content.adminDemoPage.publishedEventsSuffix}
                   </p>
                 </div>
                 <div className="glass p-5">
-                  <p className="text-sm text-slate-400">Future access</p>
+                  <p className="text-sm text-slate-400">
+                    {content.adminDemoPage.futureAccessLabel}
+                  </p>
                   <p className="mt-2 text-lg font-semibold text-white">
-                    Role-based admin system
+                    {content.adminDemoPage.futureAccessValue}
                   </p>
                 </div>
               </div>
             </FadeIn>
 
             <div className="grid gap-6 md:grid-cols-2">
-              {adminModules.map((module, index) => (
+              {content.adminModules.map((module, index) => (
                 <FadeIn
                   key={module.title}
                   delay={index * 0.06}

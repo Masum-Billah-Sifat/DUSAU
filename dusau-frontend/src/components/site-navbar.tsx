@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { navLinks, siteConfig } from '@/data/store'
+import { useLocalizedContent } from '@/hooks/use-locallized-content'
+import { useLanguageStore } from '@/store/use-language-store'
 
 export default function SiteNavbar() {
   const pathname = usePathname()
@@ -11,9 +12,16 @@ export default function SiteNavbar() {
   const [visible, setVisible] = useState(true)
   const lastScrollY = useRef(0)
 
+  const { language, content } = useLocalizedContent()
+  const toggleLanguage = useLanguageStore((state) => state.toggleLanguage)
+
   useEffect(() => {
     setOpen(false)
   }, [pathname])
+
+  useEffect(() => {
+    document.documentElement.lang = language
+  }, [language])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,14 +64,16 @@ export default function SiteNavbar() {
               </div>
               <div>
                 <p className="font-display text-base font-semibold text-white">
-                  {siteConfig.name}
+                  {content.siteConfig.name}
                 </p>
-                <p className="text-xs text-slate-400">{siteConfig.tagline}</p>
+                <p className="text-xs text-slate-400">
+                  {content.siteConfig.tagline}
+                </p>
               </div>
             </Link>
 
             <nav className="hidden items-center gap-1 lg:flex">
-              {navLinks.map((link) => {
+              {content.navLinks.map((link) => {
                 const active = pathname === link.href
 
                 return (
@@ -81,29 +91,47 @@ export default function SiteNavbar() {
                 )
               })}
 
+              <button
+                type="button"
+                onClick={toggleLanguage}
+                className="ml-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+              >
+                {language === 'en' ? 'বাংলা' : 'English'}
+              </button>
+
               <Link href="/admin-demo" className="btn-primary ml-3">
-                Admin Demo
+                {content.common.adminDemoLabel}
               </Link>
             </nav>
 
-            <button
-              type="button"
-              onClick={() => setOpen((prev) => !prev)}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-black text-white transition hover:bg-white/10 lg:hidden"
-              aria-label="Toggle menu"
-            >
-              <div className="space-y-1.5">
-                <span className="block h-0.5 w-5 bg-white" />
-                <span className="block h-0.5 w-5 bg-white" />
-                <span className="block h-0.5 w-5 bg-white" />
-              </div>
-            </button>
+            <div className="flex items-center gap-2 lg:hidden">
+              <button
+                type="button"
+                onClick={toggleLanguage}
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-white transition hover:bg-white/10"
+              >
+                {language === 'en' ? 'বাংলা' : 'English'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setOpen((prev) => !prev)}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-black text-white transition hover:bg-white/10"
+                aria-label="Toggle menu"
+              >
+                <div className="space-y-1.5">
+                  <span className="block h-0.5 w-5 bg-white" />
+                  <span className="block h-0.5 w-5 bg-white" />
+                  <span className="block h-0.5 w-5 bg-white" />
+                </div>
+              </button>
+            </div>
           </div>
 
           {open && (
             <div className="border-t border-white/10 bg-black py-3 lg:hidden">
               <div className="flex flex-col gap-1">
-                {navLinks.map((link) => {
+                {content.navLinks.map((link) => {
                   const active = pathname === link.href
 
                   return (
@@ -127,7 +155,7 @@ export default function SiteNavbar() {
                   onClick={() => setOpen(false)}
                   className="btn-primary mt-2 text-center"
                 >
-                  Admin Demo
+                  {content.common.adminDemoLabel}
                 </Link>
               </div>
             </div>

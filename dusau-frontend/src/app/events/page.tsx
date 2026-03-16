@@ -1,18 +1,21 @@
+'use client'
+
 import { EventCard } from '@/components/cards'
 import { FadeIn, SectionHeading } from '@/components/ui'
-import { events } from '@/data/store'
+import { useLocalizedContent } from '@/hooks/use-locallized-content'
 
 export default function EventsPage() {
-  const categories = Array.from(new Set(events.map((event) => event.category)))
+  const { content } = useLocalizedContent()
+  const categories = Array.from(new Set(content.events.map((event) => event.category)))
 
   return (
     <main className="page-shell">
       <section className="section-shell">
         <div className="container-app">
           <SectionHeading
-            eyebrow="Events & programs"
-            title="One platform for social work, welcome programs, bonding, and response"
-            description="This page is built so future admins can keep adding events with titles, descriptions, images, videos, dates, and categories."
+            eyebrow={content.eventsPage.eyebrow}
+            title={content.eventsPage.title}
+            description={content.eventsPage.description}
           />
 
           <FadeIn className="mt-8 flex flex-wrap gap-3">
@@ -24,7 +27,7 @@ export default function EventsPage() {
           </FadeIn>
 
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {events.map((event, index) => (
+            {content.events.map((event, index) => (
               <FadeIn key={event.id} delay={index * 0.05}>
                 <EventCard event={event} />
               </FadeIn>

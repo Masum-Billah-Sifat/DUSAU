@@ -1,38 +1,24 @@
+'use client'
+
 import { AlumniCard } from '@/components/cards'
 import { FadeIn, SectionHeading } from '@/components/ui'
-import { alumni } from '@/data/store'
-
-const reasons = [
-  {
-    title: 'Credibility',
-    description:
-      'A visible alumni network immediately shows that DUSAU has history, maturity, and long-term impact.',
-  },
-  {
-    title: 'Mentorship',
-    description:
-      'Alumni can support current students with career advice, emotional support, and real-world perspective.',
-  },
-  {
-    title: 'Continuity',
-    description:
-      'When committees change yearly, alumni become the bridge that keeps identity and values alive.',
-  },
-]
+import { useLocalizedContent } from '@/hooks/use-locallized-content'
 
 export default function AlumniPage() {
+  const { content } = useLocalizedContent()
+
   return (
     <main className="page-shell">
       <section className="section-shell">
         <div className="container-app">
           <SectionHeading
-            eyebrow="Alumni network"
-            title="Former members become the long-term strength of DUSAU"
-            description="This page is designed to show that the organization does not end with one year’s committee. It grows into a network."
+            eyebrow={content.alumniPage.eyebrow}
+            title={content.alumniPage.title}
+            description={content.alumniPage.description}
           />
 
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {alumni.map((item, index) => (
+            {content.alumni.map((item, index) => (
               <FadeIn key={item.name} delay={index * 0.06}>
                 <AlumniCard alumni={item} />
               </FadeIn>
@@ -44,7 +30,7 @@ export default function AlumniPage() {
       <section className="section-shell pt-0">
         <div className="container-app">
           <div className="grid gap-6 md:grid-cols-3">
-            {reasons.map((item, index) => (
+            {content.alumniPage.reasons.map((item, index) => (
               <FadeIn
                 key={item.title}
                 delay={index * 0.08}

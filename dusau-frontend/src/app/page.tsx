@@ -1,19 +1,17 @@
+'use client'
+
 import Link from 'next/link'
 import Hero from '@/components/hero'
 import { AlumniCard, CommitteeCard, EventCard } from '@/components/cards'
 import { FadeIn, SectionHeading } from '@/components/ui'
-import {
-  alumni,
-  committeeYears,
-  events,
-  impactAreas,
-  siteConfig,
-} from '@/data/store'
+import { useLocalizedContent } from '@/hooks/use-locallized-content'
 
 export default function Home() {
-  const featuredEvents = events.filter((event) => event.featured).slice(0, 3)
-  const currentCommittee = committeeYears[0]
-  const featuredAlumni = alumni.slice(0, 3)
+  const { content } = useLocalizedContent()
+
+  const featuredEvents = content.events.filter((event) => event.featured).slice(0, 3)
+  const currentCommittee = content.committeeYears[0]
+  const featuredAlumni = content.alumni.slice(0, 3)
 
   return (
     <main className="page-shell">
@@ -22,25 +20,20 @@ export default function Home() {
       <section className="section-shell">
         <div className="container-app grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
           <FadeIn className="glass-strong p-8 sm:p-10">
-            <span className="pill">Why this platform matters</span>
+            <span className="pill">{content.homePage.introEyebrow}</span>
             <h2 className="font-display mt-5 text-3xl font-semibold text-white sm:text-4xl">
-              DUSAU is not just an organization. It is a living student legacy.
+              {content.homePage.introTitle}
             </h2>
             <p className="mt-5 text-base leading-8 text-slate-300">
-              Every year a new group of students joins Dhaka University from
-              Uttara. They need connection, belonging, guidance, and community.
-              DUSAU becomes that bridge. It welcomes them, serves people through
-              social work, organizes events, and turns one year’s committee into
-              the next year’s alumni foundation.
+              {content.homePage.introPara1}
             </p>
             <p className="mt-4 text-base leading-8 text-slate-300">
-              This frontend is built to showcase that energy in a modern way:
-              premium visuals outside, dynamic admin-ready structure inside.
+              {content.homePage.introPara2}
             </p>
           </FadeIn>
 
           <div className="grid gap-6">
-            {impactAreas.map((item, index) => (
+            {content.impactAreas.map((item, index) => (
               <FadeIn
                 key={item.title}
                 delay={index * 0.06}
@@ -61,9 +54,9 @@ export default function Home() {
       <section id="recent-events" className="section-shell">
         <div className="container-app">
           <SectionHeading
-            eyebrow="Recent highlights"
-            title="The homepage can immediately show what DUSAU is doing now"
-            description="From welcome programs to social work, relief, winter support, sports, and alumni sessions — this is where your organization starts to look active, trusted, and alive."
+            eyebrow={content.homePage.recentEventsEyebrow}
+            title={content.homePage.recentEventsTitle}
+            description={content.homePage.recentEventsDescription}
           />
 
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -76,7 +69,7 @@ export default function Home() {
 
           <FadeIn className="mt-8">
             <Link href="/events" className="btn-secondary">
-              Explore all events
+              {content.homePage.exploreAllEvents}
             </Link>
           </FadeIn>
         </div>
@@ -85,9 +78,9 @@ export default function Home() {
       <section className="section-shell">
         <div className="container-app">
           <SectionHeading
-            eyebrow="Current leadership"
-            title={`Meet the ${currentCommittee.year} committee`}
-            description="This section is designed so that every year a new committee can be displayed beautifully, while past committees remain archived."
+            eyebrow={content.homePage.leadershipEyebrow}
+            title={`${content.homePage.leadershipTitlePrefix}${currentCommittee.year}${content.homePage.leadershipTitleSuffix}`}
+            description={content.homePage.leadershipDescription}
           />
 
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -104,51 +97,32 @@ export default function Home() {
         <div className="container-app">
           <div className="glass-strong grid gap-8 p-8 sm:p-10 lg:grid-cols-[1.05fr_0.95fr]">
             <FadeIn>
-              <span className="pill">Emergency support</span>
+              <span className="pill">{content.homePage.emergencyEyebrow}</span>
               <h2 className="font-display mt-5 text-3xl font-semibold text-white sm:text-4xl">
-                DUSAU can also become a serious blood-support and emergency
-                help platform
+                {content.homePage.emergencyTitle}
               </h2>
               <p className="mt-5 text-base leading-8 text-slate-300">
-                The public website can collect urgent requests, while the donor
-                list remains private and admin-controlled for safety. That means
-                the site looks responsible, useful, and well organized.
+                {content.homePage.emergencyPara}
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link href="/blood-support" className="btn-primary">
-                  Blood support page
+                  {content.homePage.emergencyPrimaryCta}
                 </Link>
                 <Link href="/contact" className="btn-secondary">
-                  Contact DUSAU
+                  {content.homePage.emergencySecondaryCta}
                 </Link>
               </div>
             </FadeIn>
 
             <FadeIn delay={0.12} className="grid gap-4 sm:grid-cols-2">
-              <div className="glass p-5">
-                <p className="text-sm text-slate-400">Public facing</p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  Urgent request form
-                </p>
-              </div>
-              <div className="glass p-5">
-                <p className="text-sm text-slate-400">Private system</p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  Donor directory for admins
-                </p>
-              </div>
-              <div className="glass p-5">
-                <p className="text-sm text-slate-400">Fast response</p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  Blood group filtering later
-                </p>
-              </div>
-              <div className="glass p-5">
-                <p className="text-sm text-slate-400">Trust</p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  Useful social impact feature
-                </p>
-              </div>
+              {content.homePage.emergencyCards.map((card) => (
+                <div key={card.value} className="glass p-5">
+                  <p className="text-sm text-slate-400">{card.label}</p>
+                  <p className="mt-2 text-lg font-semibold text-white">
+                    {card.value}
+                  </p>
+                </div>
+              ))}
             </FadeIn>
           </div>
         </div>
@@ -157,9 +131,9 @@ export default function Home() {
       <section className="section-shell">
         <div className="container-app">
           <SectionHeading
-            eyebrow="Alumni strength"
-            title="A strong alumni section gives DUSAU prestige and continuity"
-            description="When visitors see former members now working in good places, the organization instantly feels established, real, and respected."
+            eyebrow={content.homePage.alumniEyebrow}
+            title={content.homePage.alumniTitle}
+            description={content.homePage.alumniDescription}
           />
 
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -175,35 +149,28 @@ export default function Home() {
       <section className="section-shell pt-4">
         <div className="container-app">
           <FadeIn className="glass-strong p-8 sm:p-10">
-            <span className="pill">Closing thought</span>
+            <span className="pill">{content.homePage.closingEyebrow}</span>
             <h2 className="font-display mt-5 text-3xl font-semibold text-white sm:text-4xl">
-              A website like this can make DUSAU feel bigger than just a Facebook
-              page
+              {content.homePage.closingTitle}
             </h2>
             <p className="mt-5 text-base leading-8 text-slate-300">
-              It can communicate identity, trust, activity, leadership, service,
-              and long-term legacy. For DUSAU, the best direction is not an open
-              social network at first. It is a premium public website plus a
-              future admin dashboard where each new yearly committee can manage
-              events, members, alumni, media, and support initiatives.
+              {content.homePage.closingPara1}
             </p>
             <p className="mt-4 text-base leading-8 text-slate-300">
-              That is the sweet spot: beautiful on the outside, dynamic on the
-              inside, and built to grow into a real platform later.
+              {content.homePage.closingPara2}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
               <Link href="/about" className="btn-secondary">
-                Read the story
+                {content.homePage.closingPrimaryCta}
               </Link>
               <Link href="/admin-demo" className="btn-primary">
-                See future admin vision
+                {content.homePage.closingSecondaryCta}
               </Link>
             </div>
 
             <p className="mt-8 text-sm text-slate-400">
-              Demo note: All content here is placeholder frontend content using
-              one shared image and centralized dummy data from store.ts.
+              {content.homePage.demoNote}
             </p>
           </FadeIn>
         </div>

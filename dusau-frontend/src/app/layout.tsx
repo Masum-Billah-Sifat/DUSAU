@@ -5,7 +5,7 @@ import './globals.css'
 import SiteNavbar from '@/components/site-navbar'
 import SiteFooter from '@/components/site-footer'
 import ScrollToTopButton from '@/components/scroll-to-top-button'
-import { siteConfig } from '@/data/store'
+import { localizedContent } from '@/data/store'
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -20,8 +20,8 @@ const grotesk = Space_Grotesk({
 })
 
 export const metadata: Metadata = {
-  title: `${siteConfig.name} | Student Community Platform`,
-  description: siteConfig.description,
+  title: `${localizedContent.en.siteConfig.name} | Student Community Platform`,
+  description: localizedContent.en.siteConfig.description,
 }
 
 export default function RootLayout({

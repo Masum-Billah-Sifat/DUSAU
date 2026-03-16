@@ -1,40 +1,40 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
-import { events, homeStats, siteConfig } from '@/data/store'
 import { FadeIn } from '@/components/ui'
+import { useLocalizedContent } from '@/hooks/use-locallized-content'
 
 export default function Hero() {
-  const highlightEvent = events[0]
+  const { content } = useLocalizedContent()
+  const highlightEvent = content.events[0]
 
   return (
     <section className="section-shell pt-10 sm:pt-14">
       <div className="container-app grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
         <FadeIn>
-          <span className="pill">Student-led • Service-driven • Uttara to DU</span>
+          <span className="pill">{content.hero.eyebrow}</span>
 
           <h1 className="font-display mt-6 text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-            A modern digital home for{' '}
-            <span className="text-gradient">{siteConfig.name}</span>
+            {content.hero.titleLead}{' '}
+            <span className="text-gradient">{content.siteConfig.name}</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            {siteConfig.fullName} is a student-run platform built around
-            welcome, welfare, events, alumni connection, and meaningful social
-            work. This frontend is designed as a premium showcase that can later
-            connect to a real admin dashboard and backend.
+            {content.hero.description}
           </p>
 
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="#recent-events" className="btn-primary">
-              See recent events
+              {content.hero.primaryCta}
             </Link>
             <Link href="/admin-demo" className="btn-secondary">
-              View admin demo
+              {content.hero.secondaryCta}
             </Link>
           </div>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {homeStats.map((item) => (
+            {content.homeStats.map((item) => (
               <div key={item.label} className="glass p-5">
                 <p className="font-display text-2xl font-semibold text-white">
                   {item.value}
@@ -50,8 +50,8 @@ export default function Hero() {
             <div className="glass-strong relative overflow-hidden p-3 sm:p-4">
               <div className="relative h-[380px] overflow-hidden rounded-[1.75rem] sm:h-[520px]">
                 <Image
-                  src={siteConfig.heroImage}
-                  alt="DUSAU"
+                  src={content.siteConfig.heroImage}
+                  alt={content.siteConfig.name}
                   fill
                   priority
                   className="object-cover"
@@ -73,21 +73,19 @@ export default function Hero() {
 
             <div className="glass absolute -bottom-6 left-4 max-w-[230px] p-4 sm:-left-8 sm:max-w-[260px]">
               <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
-                Annual committee cycle
+                {content.hero.annualCycleLabel}
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-200">
-                New students join. A new committee leads. Alumni stay connected.
-                The story continues every year.
+                {content.hero.annualCycleText}
               </p>
             </div>
 
             <div className="glass absolute -right-2 top-6 max-w-[220px] p-4 sm:-right-8">
               <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
-                Platform vision
+                {content.hero.platformVisionLabel}
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-200">
-                Public-facing impact website now, dynamic backend-powered system
-                next.
+                {content.hero.platformVisionText}
               </p>
             </div>
           </div>

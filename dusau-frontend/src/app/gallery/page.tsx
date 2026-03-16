@@ -1,22 +1,26 @@
+'use client'
+
 import Image from 'next/image'
 import { FadeIn, SectionHeading } from '@/components/ui'
-import { galleryItems } from '@/data/store'
+import { useLocalizedContent } from '@/hooks/use-locallized-content'
 
 const heights = ['h-[260px]', 'h-[340px]', 'h-[300px]']
 
 export default function GalleryPage() {
+  const { content } = useLocalizedContent()
+
   return (
     <main className="page-shell">
       <section className="section-shell">
         <div className="container-app">
           <SectionHeading
-            eyebrow="Gallery"
-            title="A visual story of service, people, memory, and movement"
-            description="For now this uses the same dummy image everywhere. Later each item can be tied to real events, albums, and media uploads."
+            eyebrow={content.galleryPage.eyebrow}
+            title={content.galleryPage.title}
+            description={content.galleryPage.description}
           />
 
           <div className="masonry-columns mt-10">
-            {galleryItems.map((item, index) => (
+            {content.galleryItems.map((item, index) => (
               <div key={item.id} className="masonry-item mb-4">
                 <FadeIn className="glass group overflow-hidden">
                   <div

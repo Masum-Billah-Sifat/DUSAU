@@ -1,19 +1,22 @@
+'use client'
+
 import { CommitteeCard } from '@/components/cards'
 import { FadeIn, SectionHeading } from '@/components/ui'
-import { committeeYears } from '@/data/store'
+import { useLocalizedContent } from '@/hooks/use-locallized-content'
 
 export default function CommitteePage() {
-  const currentCommittee = committeeYears[0]
-  const archiveCommittees = committeeYears.slice(1)
+  const { content } = useLocalizedContent()
+  const currentCommittee = content.committeeYears[0]
+  const archiveCommittees = content.committeeYears.slice(1)
 
   return (
     <main className="page-shell">
       <section className="section-shell">
         <div className="container-app">
           <SectionHeading
-            eyebrow="Committee structure"
-            title={`Current leadership: ${currentCommittee.year}`}
-            description="Every year a new committee can take over, manage the organization, publish events, and later move into the alumni archive."
+            eyebrow={content.committeePage.eyebrow}
+            title={`${content.committeePage.titlePrefix}${currentCommittee.year}${content.committeePage.titleSuffix}`}
+            description={content.committeePage.description}
           />
 
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -29,9 +32,9 @@ export default function CommitteePage() {
       <section className="section-shell pt-0">
         <div className="container-app">
           <SectionHeading
-            eyebrow="Archive"
-            title="Past committees should remain part of the story"
-            description="Instead of deleting old leadership, this design keeps every year discoverable so DUSAU feels continuous and established."
+            eyebrow={content.committeePage.archiveEyebrow}
+            title={content.committeePage.archiveTitle}
+            description={content.committeePage.archiveDescription}
           />
 
           <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -43,13 +46,18 @@ export default function CommitteePage() {
               >
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <p className="pill">{committee.year} Committee</p>
+                    <p className="pill">
+                      {committee.year}
+                      {content.committeePage.titleSuffix || ' Committee'}
+                    </p>
                     <h3 className="font-display mt-4 text-2xl font-semibold text-white">
-                      Yearly archive
+                      {content.committeePage.archiveCardTitle}
                     </h3>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
-                    {committee.members.length} members shown
+                    {content.committeePage.archiveMembersPrefix}
+                    {committee.members.length}
+                    {content.committeePage.archiveMembersSuffix}
                   </div>
                 </div>
 
