@@ -343,6 +343,12 @@ export const localizedContent = {
       { label: 'Gallery', href: '/gallery' },
       { label: 'Blood Support', href: '/blood-support' },
       { label: 'Contact', href: '/contact' },
+      { label: 'Login', href: '/login' },
+      { label: 'dashboard', href: '/dashboard' },
+      { label: 'test-public', href: '/test' },
+
+
+
     ] as NavLink[],
 
     homeStats: [

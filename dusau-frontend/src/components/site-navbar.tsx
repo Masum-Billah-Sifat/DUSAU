@@ -7,6 +7,9 @@ import { useLocalizedContent } from '@/hooks/use-locallized-content'
 import { useLanguageStore } from '@/store/use-language-store'
 
 export default function SiteNavbar() {
+
+
+
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(true)
@@ -14,6 +17,8 @@ export default function SiteNavbar() {
 
   const { language, content } = useLocalizedContent()
   const toggleLanguage = useLanguageStore((state) => state.toggleLanguage)
+
+  const isDashboardRoute = pathname.startsWith('/dashboard')
 
   useEffect(() => {
     setOpen(false)
@@ -49,6 +54,63 @@ export default function SiteNavbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  if (isDashboardRoute) {
+    return null
+  }
+
+
+
+  // const pathname = usePathname()
+  // const [open, setOpen] = useState(false)
+  // const [visible, setVisible] = useState(true)
+  // const lastScrollY = useRef(0)
+
+
+  // //  const pathname = usePathname()
+
+  // const isDashboardRoute = pathname.startsWith('/dashboard')
+
+  // if (isDashboardRoute) {
+  //   return null
+  // }
+
+  // const { language, content } = useLocalizedContent()
+  // const toggleLanguage = useLanguageStore((state) => state.toggleLanguage)
+
+  // useEffect(() => {
+  //   setOpen(false)
+  // }, [pathname])
+
+  // useEffect(() => {
+  //   document.documentElement.lang = language
+  // }, [language])
+
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     const currentScrollY = window.scrollY
+
+  //     if (currentScrollY <= 24) {
+  //       setVisible(true)
+  //       lastScrollY.current = currentScrollY
+  //       return
+  //     }
+
+  //     const scrollingDown = currentScrollY > lastScrollY.current
+
+  //     if (scrollingDown && currentScrollY > 180) {
+  //       setVisible(false)
+  //       setOpen(false)
+  //     } else {
+  //       setVisible(true)
+  //     }
+
+  //     lastScrollY.current = currentScrollY
+  //   }
+
+  //   window.addEventListener('scroll', handleScroll, { passive: true })
+  //   return () => window.removeEventListener('scroll', handleScroll)
+  // }, [])
+
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
@@ -63,12 +125,12 @@ export default function SiteNavbar() {
                 DU
               </div>
               <div>
-                <p className="font-display text-base font-semibold text-white">
+                {/* <p className="font-display text-base font-semibold text-white">
                   {content.siteConfig.name}
-                </p>
-                <p className="text-xs text-slate-400">
+                </p> */}
+                {/* <p className="text-xs text-slate-400">
                   {content.siteConfig.tagline}
-                </p>
+                </p> */}
               </div>
             </Link>
 
@@ -165,3 +227,42 @@ export default function SiteNavbar() {
     </header>
   )
 }
+
+// 'use client'
+
+// import Link from 'next/link'
+// import { usePathname } from 'next/navigation'
+// import { useLocalizedContent } from '@/hooks/use-locallized-content'
+
+// export default function SiteNavbar() {
+//   const { content } = useLocalizedContent()
+//   const pathname = usePathname()
+
+//   const isDashboardRoute = pathname.startsWith('/dashboard')
+
+//   if (isDashboardRoute) {
+//     return null
+//   }
+
+//   return (
+//     <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/70 backdrop-blur">
+//       <div className="container-app flex items-center justify-between py-4">
+//         <Link href="/" className="font-display text-2xl font-semibold text-white">
+//           {content.siteConfig.name}
+//         </Link>
+
+//         <nav className="hidden items-center gap-6 md:flex">
+//           {content.navLinks.map((link) => (
+//             <Link
+//               key={link.href}
+//               href={link.href}
+//               className="text-sm text-slate-300 transition hover:text-white"
+//             >
+//               {link.label}
+//             </Link>
+//           ))}
+//         </nav>
+//       </div>
+//     </header>
+//   )
+// }

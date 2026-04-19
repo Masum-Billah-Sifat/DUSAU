@@ -119,3 +119,12 @@ a {
     }
   }
 }
+
+.dashboard-scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.dashboard-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
