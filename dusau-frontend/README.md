@@ -1,36 +1,154 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# DUSAU First Stage: Auth + Organization + Database Foundation
 
-## Getting Started
+This package contains the first-stage implementation for converting the hardcoded DUSAU site into a dynamic Supabase-backed admin site.
 
-First, run the development server:
+## What is included
+
+- Complete Supabase SQL schema for:
+  - `organizations`
+  - `admin_sessions`
+  - `committees`
+  - `committee_members`
+  - `alumni`
+  - `advisors`
+  - `gallery_items`
+  - `events`
+  - `event_images`
+  - `event_videos`
+- Fixed enum list from `2001-02` to `2049-50`.
+- `from_year`, `to_year`, and `session` use this enum.
+- Auth endpoints:
+  - `POST /api/admin/auth/login`
+  - `GET /api/admin/auth/me`
+  - `POST /api/admin/auth/logout`
+  - `POST /api/admin/auth/logout-all`
+  - `PATCH /api/admin/auth/change-password`
+  - `PATCH /api/admin/auth/change-email`
+- Organization endpoints:
+  - `GET /api/admin/organization`
+  - `PATCH /api/admin/organization`
+  - `GET /api/public/organization`
+- Frontend pages:
+  - `/login`
+  - `/dashboard`
+
+## Copying files
+
+Copy the folders in this package into your Next.js project root.
+
+Expected project structure after copying:
+
+```txt
+src/lib/api/...
+src/app/api/admin/...
+src/app/api/public/...
+src/app/login/page.tsx
+src/app/dashboard/page.tsx
+supabase/schema.sql
+scripts/hash-admin-password.mjs
+```
+
+## Required environment variables
+
+Your `.env.local` should have:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+SUPABASE_SECRET_KEY=your_service_role_key
+JWT_SECRET=use_a_long_random_secret_here
+SUPABASE_STORAGE_BUCKET=media
+```
+
+`SUPABASE_SECRET_KEY` must be your service role key because backend admin routes need to read/write protected tables.
+
+## Database setup
+
+1. Open Supabase dashboard.
+2. Go to SQL Editor.
+3. Paste and run `supabase/schema.sql`.
+
+## Create the first admin password hash
+
+Run:
+
+```bash
+node scripts/hash-admin-password.mjs "YourStrongPasswordHere"
+```
+
+Copy the generated hash.
+
+Then insert/update your single organization row:
+
+```sql
+insert into organizations (
+  id,
+  public_email,
+  public_phone,
+  cover_image_path,
+  cover_title,
+  cover_description,
+  admin_email,
+  admin_password_hash
+)
+values (
+  1,
+  'public@example.com',
+  '+8801000000000',
+  'media/cover.jpg',
+  'DUSAU',
+  'Dhaka University Statistics Alumni Association',
+  'admin@example.com',
+  'PASTE_HASH_HERE'
+)
+on conflict (id) do update set
+  public_email = excluded.public_email,
+  public_phone = excluded.public_phone,
+  cover_image_path = excluded.cover_image_path,
+  cover_title = excluded.cover_title,
+  cover_description = excluded.cover_description,
+  admin_email = excluded.admin_email,
+  admin_password_hash = excluded.admin_password_hash;
+```
+
+## Run locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then visit:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```txt
+/login
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+After login, you will be redirected to:
 
-## Learn More
+```txt
+/dashboard
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Auth behavior
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- No registration.
+- Login only.
+- Password is stored as `admin_password_hash`, never plain text.
+- Login creates an `admin_sessions` row.
+- JWT is stored in an HttpOnly cookie.
+- JWT/session expiry is 3 hours.
+- No refresh token.
+- Hard reload does not log out the admin while the session is valid because `/dashboard` calls `/api/admin/auth/me`.
+- Logout revokes only the current session.
+- Logout all revokes every active session.
+- Changing password/email revokes every active session and forces login again.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Important notes for later stages
 
-## Deploy on Vercel
+The schema already supports:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- One pinned committee only.
+- Pinned and normal ordering via `sort_order` and `pinned_sort_order`.
+- Maximum pinned count rules should be enforced in API logic later.
+- "At least one pinned item" rules should be enforced in API logic later.
+- Event images are mandatory logically, but that should be enforced in the create/update event API later because child rows are inserted separately.

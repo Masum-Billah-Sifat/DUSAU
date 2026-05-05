@@ -1,22 +1,21 @@
-import { supabaseAdmin } from '@/lib/supabase/admin'
-import { serverError } from '@/lib/api/http'
+import { createClient } from '@supabase/supabase-js';
+import { getSupabaseServiceKey, getSupabaseUrl } from './config';
 
-export async function maybeSingle<T>(queryPromise: Promise<{ data: T | null; error: any }>) {
-  const { data, error } = await queryPromise
-  if (error) throw error
-  return data
+export const supabaseAdmin = createClient(getSupabaseUrl(), getSupabaseServiceKey(), {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
+
+export async function maybeSingle<T>(query: PromiseLike<{ data: T | null; error: unknown }>) {
+  const { data, error } = await query;
+  if (error) throw error;
+  return data;
 }
 
-export async function many<T>(queryPromise: Promise<{ data: T[] | null; error: any }>) {
-  const { data, error } = await queryPromise
-  if (error) throw error
-  return data ?? []
+export async function runQuery<T>(query: PromiseLike<{ data: T; error: unknown }>) {
+  const { data, error } = await query;
+  if (error) throw error;
+  return data;
 }
-
-export async function runUpdate(queryPromise: Promise<{ data: any; error: any }>) {
-  const { data, error } = await queryPromise
-  if (error) throw error
-  return data
-}
-
-export { supabaseAdmin, serverError }

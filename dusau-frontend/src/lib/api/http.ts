@@ -1,35 +1,39 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
-export function ok(data: unknown, init?: ResponseInit) {
-  return NextResponse.json({ data }, { status: 200, ...init })
+export function json(data: unknown, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: {
+      'Cache-Control': 'no-store',
+    },
+  });
 }
 
-export function created(data: unknown, init?: ResponseInit) {
-  return NextResponse.json({ data }, { status: 201, ...init })
+export function ok(data: unknown = { ok: true }) {
+  return json(data, 200);
 }
 
-export function badRequest(message: string, details?: unknown) {
-  return NextResponse.json(
-    { message, ...(details !== undefined ? { details } : {}) },
-    { status: 400 }
-  )
+export function created(data: unknown = { ok: true }) {
+  return json(data, 201);
 }
 
-export function unauthorized(message = 'Unauthorized') {
-  return NextResponse.json({ message }, { status: 401 })
+export function badRequest(message = 'Bad request', code = 'BAD_REQUEST') {
+  return json({ ok: false, code, message }, 400);
 }
 
-export function notFound(message = 'Not found') {
-  return NextResponse.json({ message }, { status: 404 })
+export function unauthorized(message = 'Please login again.', code = 'UNAUTHORIZED') {
+  return json({ ok: false, code, message }, 401);
 }
 
-export function serverError(message = 'Internal server error', details?: unknown) {
-  return NextResponse.json(
-    { message, ...(details !== undefined ? { details } : {}) },
-    { status: 500 }
-  )
+export function forbidden(message = 'Forbidden', code = 'FORBIDDEN') {
+  return json({ ok: false, code, message }, 403);
+}
+
+export function serverError(error: unknown) {
+  console.error(error);
+  return json({ ok: false, code: 'SERVER_ERROR', message: 'Something went wrong.' }, 500);
 }
 
 export function toErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : 'Unknown error'
+  return error instanceof Error ? error.message : 'Unknown error';
 }

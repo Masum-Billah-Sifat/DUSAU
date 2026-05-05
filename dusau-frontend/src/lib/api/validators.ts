@@ -1,68 +1,35 @@
-export function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
+import { NextRequest } from 'next/server';
 
-export async function parseJsonBody(request: Request) {
+export async function parseJsonBody(request: NextRequest) {
   try {
-    const body = await request.json()
-    return isObject(body) ? body : {}
+    return await request.json();
   } catch {
-    return {}
+    return null;
   }
-}
-
-export function pickDefined<T extends Record<string, unknown>>(input: T) {
-  return Object.fromEntries(
-    Object.entries(input).filter(([, value]) => value !== undefined)
-  )
 }
 
 export function asString(value: unknown) {
-  return typeof value === 'string' ? value.trim() : undefined
+  return typeof value === 'string' ? value.trim() : '';
 }
 
-export function asNullableString(value: unknown) {
-  if (value === null) return null
-  return typeof value === 'string' ? value.trim() : undefined
-}
-
-export function asBoolean(value: unknown) {
-  return typeof value === 'boolean' ? value : undefined
-}
-
-export function asInteger(value: unknown) {
-  return typeof value === 'number' && Number.isInteger(value) ? value : undefined
-}
-
-export function asStringArray(value: unknown) {
-  if (!Array.isArray(value)) return undefined
-  return value
-    .filter((item): item is string => typeof item === 'string')
-    .map((item) => item.trim())
-    .filter(Boolean)
-}
-
-export function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-}
-
-export function validateRequiredStrings(
-  input: Record<string, unknown>,
-  fields: string[]
-) {
-  const missing = fields.filter((field) => {
-    const value = input[field]
-    return typeof value !== 'string' || value.trim() === ''
-  })
-
-  return {
-    isValid: missing.length === 0,
-    missing,
+export function requireString(body: Record<string, unknown>, key: string) {
+  const value = asString(body[key]);
+  if (!value) {
+    throw new Error(`${key} is required.`);
   }
+  return value;
+}
+
+export function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
+}
+
+export function pickOrganizationMetadata(body: Record<string, unknown>) {
+  return {
+    public_email: requireString(body, 'public_email'),
+    public_phone: requireString(body, 'public_phone'),
+    cover_image_path: requireString(body, 'cover_image_path'),
+    cover_title: requireString(body, 'cover_title'),
+    cover_description: requireString(body, 'cover_description'),
+  };
 }
