@@ -340,14 +340,12 @@ export const localizedContent = {
       { label: 'Events', href: '/events' },
       { label: 'Committee', href: '/committee' },
       { label: 'Alumni', href: '/alumni' },
+      { label: 'Advisor', href: '/advisors'},
       { label: 'Gallery', href: '/gallery' },
-      { label: 'Blood Support', href: '/blood-support' },
+      // { label: 'Blood Support', href: '/blood-support' },
       { label: 'Contact', href: '/contact' },
       { label: 'Login', href: '/login' },
       { label: 'dashboard', href: '/dashboard' },
-      { label: 'test-public', href: '/test' },
-
-
 
     ] as NavLink[],
 
