@@ -1,4 +1,94 @@
+// import { NextRequest } from 'next/server';
+
+// export async function parseJsonBody(request: NextRequest) {
+//   try {
+//     return await request.json();
+//   } catch {
+//     return null;
+//   }
+// }
+
+// export function asString(value: unknown) {
+//   return typeof value === 'string' ? value.trim() : '';
+// }
+
+// export function requireString(body: Record<string, unknown>, key: string) {
+//   const value = asString(body[key]);
+//   if (!value) {
+//     throw new Error(`${key} is required.`);
+//   }
+//   return value;
+// }
+
+// export function normalizeEmail(value: string) {
+//   return value.trim().toLowerCase();
+// }
+
+// export function pickOrganizationMetadata(body: Record<string, unknown>) {
+//   return {
+//     public_email: requireString(body, 'public_email'),
+//     public_phone: requireString(body, 'public_phone'),
+//     cover_image_path: requireString(body, 'cover_image_path'),
+//     cover_title: requireString(body, 'cover_title'),
+//     cover_description: requireString(body, 'cover_description'),
+//   };
+// }
+
 import { NextRequest } from 'next/server';
+
+export const DUSAU_SESSION_YEARS = [
+  '2001-02',
+  '2002-03',
+  '2003-04',
+  '2004-05',
+  '2005-06',
+  '2006-07',
+  '2007-08',
+  '2008-09',
+  '2009-10',
+  '2010-11',
+  '2011-12',
+  '2012-13',
+  '2013-14',
+  '2014-15',
+  '2015-16',
+  '2016-17',
+  '2017-18',
+  '2018-19',
+  '2019-20',
+  '2020-21',
+  '2021-22',
+  '2022-23',
+  '2023-24',
+  '2024-25',
+  '2025-26',
+  '2026-27',
+  '2027-28',
+  '2028-29',
+  '2029-30',
+  '2030-31',
+  '2031-32',
+  '2032-33',
+  '2033-34',
+  '2034-35',
+  '2035-36',
+  '2036-37',
+  '2037-38',
+  '2038-39',
+  '2039-40',
+  '2040-41',
+  '2041-42',
+  '2042-43',
+  '2043-44',
+  '2044-45',
+  '2045-46',
+  '2046-47',
+  '2047-48',
+  '2048-49',
+  '2049-50',
+] as const;
+
+export type DusauSessionYear = (typeof DUSAU_SESSION_YEARS)[number];
 
 export async function parseJsonBody(request: NextRequest) {
   try {
@@ -8,8 +98,21 @@ export async function parseJsonBody(request: NextRequest) {
   }
 }
 
+export function assertRecord(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('Invalid request body.');
+  }
+
+  return value as Record<string, unknown>;
+}
+
 export function asString(value: unknown) {
   return typeof value === 'string' ? value.trim() : '';
+}
+
+export function asNullableString(value: unknown) {
+  const text = asString(value);
+  return text ? text : null;
 }
 
 export function requireString(body: Record<string, unknown>, key: string) {
@@ -18,6 +121,40 @@ export function requireString(body: Record<string, unknown>, key: string) {
     throw new Error(`${key} is required.`);
   }
   return value;
+}
+
+export function requireSessionYear(body: Record<string, unknown>, key: string): DusauSessionYear {
+  const value = requireString(body, key);
+
+  if (!DUSAU_SESSION_YEARS.includes(value as DusauSessionYear)) {
+    throw new Error(`${key} must be a valid session year.`);
+  }
+
+  return value as DusauSessionYear;
+}
+
+export function requireBoolean(body: Record<string, unknown>, key: string) {
+  const value = body[key];
+
+  if (typeof value !== 'boolean') {
+    throw new Error(`${key} must be boolean.`);
+  }
+
+  return value;
+}
+
+export function requireIdArray(body: Record<string, unknown>) {
+  const ids = body.ids;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    throw new Error('ids must be a non-empty array.');
+  }
+
+  return ids.map((id) => {
+    const text = asString(id);
+    if (!text) throw new Error('Every id must be a string.');
+    return text;
+  });
 }
 
 export function normalizeEmail(value: string) {
@@ -32,4 +169,39 @@ export function pickOrganizationMetadata(body: Record<string, unknown>) {
     cover_title: requireString(body, 'cover_title'),
     cover_description: requireString(body, 'cover_description'),
   };
+}
+
+
+export function requireNonEmptyStringArray(body: Record<string, unknown>, key: string) {
+  const value = body[key];
+
+  if (!Array.isArray(value)) {
+    throw new Error(`${key} must be an array.`);
+  }
+
+  const cleaned = value
+    .map((item) => asString(item))
+    .filter(Boolean);
+
+  if (cleaned.length < 1) {
+    throw new Error(`${key} must contain at least one value.`);
+  }
+
+  return cleaned;
+}
+
+export function optionalStringArray(body: Record<string, unknown>, key: string) {
+  const value = body[key];
+
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new Error(`${key} must be an array.`);
+  }
+
+  return value
+    .map((item) => asString(item))
+    .filter(Boolean);
 }
