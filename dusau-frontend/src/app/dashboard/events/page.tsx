@@ -1,36 +1,37 @@
-'use client';
+'use client'
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-import { ImageUploadField } from '@/components/admin/image-upload-field';
-import { AdminButton, TextInput, TextareaInput } from '@/components/admin/form-fields';
-import { StatusBadge } from '@/components/admin/status-badge';
-import { adminJson } from '@/lib/admin/api';
-import { moveItemById } from '@/lib/admin/reorder';
+import { FormEvent, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import { ImageUploadField } from '@/components/admin/image-upload-field'
+import { AdminButton, TextInput, TextareaInput } from '@/components/admin/form-fields'
+import { StatusBadge } from '@/components/admin/status-badge'
+import { adminJson } from '@/lib/admin/api'
+import { moveItemById } from '@/lib/admin/reorder'
+import { toMediaUrl, toYouTubeEmbedUrl } from '@/lib/public/media'
 
 type EventItem = {
-  id: string;
-  title: string;
-  description: string;
-  event_date: string;
-  category: string;
-  location_tags: string[];
-  cover_image_path: string;
-  is_archived: boolean;
-  is_pinned: boolean;
-  sort_order: number;
-  pinned_sort_order: number;
-};
+  id: string
+  title: string
+  description: string
+  event_date: string
+  category: string
+  location_tags: string[]
+  cover_image_path: string
+  is_archived: boolean
+  is_pinned: boolean
+  sort_order: number
+  pinned_sort_order: number
+}
 
 type EventListResponse = {
-  ok: boolean;
-  events: EventItem[];
-};
+  ok: boolean
+  events: EventItem[]
+}
 
 type EventCreateResponse = {
-  ok: boolean;
-  event: EventItem;
-};
+  ok: boolean
+  event: EventItem
+}
 
 const emptyForm = {
   title: '',
@@ -41,28 +42,116 @@ const emptyForm = {
   cover_image_path: '',
   first_image_path: '',
   youtube_urls_text: '',
-};
+}
 
 function parseCommaList(value: string) {
   return value
     .split(',')
     .map((item) => item.trim())
-    .filter(Boolean);
+    .filter(Boolean)
 }
 
 function parseLineList(value: string) {
   return value
     .split('\n')
     .map((item) => item.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+}
+
+function LoadingState() {
+  return (
+    <div className="space-y-5">
+      <div className="rounded-[2rem] border border-[hsl(var(--border-soft))] bg-white p-6 shadow-sm">
+        <div className="h-7 w-44 animate-pulse rounded-full bg-[hsl(var(--app-bg-soft))]" />
+        <div className="mt-3 h-4 w-80 max-w-full animate-pulse rounded-full bg-[hsl(var(--app-bg-soft))]" />
+        <div className="mt-6 h-64 animate-pulse rounded-[1.5rem] bg-[hsl(var(--app-bg-soft))]" />
+      </div>
+    </div>
+  )
+}
+
+function EmptyState({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-[1.5rem] border border-dashed border-[hsl(var(--border-strong))] bg-white/80 p-6 text-center">
+      <p className="text-sm font-semibold leading-7 text-[hsl(var(--text-muted))]">
+        {children}
+      </p>
+    </div>
+  )
+}
+
+function EventCoverThumb({ eventItem }: { eventItem: EventItem }) {
+  if (!eventItem.cover_image_path) {
+    return (
+      <div className="flex h-20 w-24 shrink-0 items-center justify-center rounded-2xl bg-[hsl(var(--brand-soft))] text-xs font-black text-[hsl(var(--brand))] sm:h-24 sm:w-32">
+        Event
+      </div>
+    )
+  }
+
+  return (
+    <div className="h-20 w-24 shrink-0 overflow-hidden rounded-2xl border border-[hsl(var(--border-soft))] bg-[hsl(var(--app-bg-soft))] shadow-sm sm:h-24 sm:w-32">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={toMediaUrl(eventItem.cover_image_path)}
+        alt={eventItem.title}
+        className="h-full w-full object-cover"
+      />
+    </div>
+  )
+}
+
+function YouTubePreviewGrid({ urls }: { urls: string[] }) {
+  if (urls.length === 0) return null
+
+  return (
+    <div className="md:col-span-2">
+      <p className="mb-3 text-sm font-bold text-[hsl(var(--text-main))]">
+        YouTube preview
+      </p>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {urls.map((url, index) => {
+          const embedUrl = toYouTubeEmbedUrl(url)
+
+          return (
+            <div
+              key={`${url}-${index}`}
+              className="overflow-hidden rounded-[1.5rem] border border-[hsl(var(--border-soft))] bg-white p-3 shadow-sm"
+            >
+              {embedUrl ? (
+                <div className="aspect-video overflow-hidden rounded-[1.1rem] bg-[hsl(var(--app-bg-soft))]">
+                  <iframe
+                    src={embedUrl}
+                    title={`YouTube preview ${index + 1}`}
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <div className="flex aspect-video items-center justify-center rounded-[1.1rem] bg-[hsl(var(--app-bg-soft))] p-4 text-center text-sm font-semibold text-[hsl(var(--text-muted))]">
+                  Invalid YouTube URL
+                </div>
+              )}
+
+              <p className="mt-3 break-all text-xs font-semibold leading-6 text-[hsl(var(--text-muted))]">
+                {url}
+              </p>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 export default function EventsPage() {
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [form, setForm] = useState(emptyForm);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [events, setEvents] = useState<EventItem[]>([])
+  const [form, setForm] = useState(emptyForm)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [notice, setNotice] = useState<string | null>(null)
 
   const pinnedEvents = useMemo(
     () =>
@@ -70,30 +159,35 @@ export default function EventsPage() {
         .filter((event) => event.is_pinned && !event.is_archived)
         .sort((a, b) => (a.pinned_sort_order || 0) - (b.pinned_sort_order || 0)),
     [events],
-  );
+  )
+
+  const youtubePreviewUrls = useMemo(
+    () => parseLineList(form.youtube_urls_text),
+    [form.youtube_urls_text],
+  )
 
   async function loadEvents() {
     try {
-      const data = await adminJson<EventListResponse>('/api/admin/events');
-      setEvents(data.events || []);
+      const data = await adminJson<EventListResponse>('/api/admin/events')
+      setEvents(data.events || [])
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : 'Could not load events.');
+      setNotice(error instanceof Error ? error.message : 'Could not load events.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    loadEvents();
-  }, []);
+    loadEvents()
+  }, [])
 
   async function createEvent(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSaving(true);
-    setNotice(null);
+    event.preventDefault()
+    setSaving(true)
+    setNotice(null)
 
     try {
-      const data = await adminJson<EventCreateResponse>('/api/admin/events', {
+      await adminJson<EventCreateResponse>('/api/admin/events', {
         method: 'POST',
         body: JSON.stringify({
           title: form.title,
@@ -105,15 +199,15 @@ export default function EventsPage() {
           image_paths: [form.first_image_path].filter(Boolean),
           youtube_urls: parseLineList(form.youtube_urls_text),
         }),
-      });
+      })
 
-      setForm(emptyForm);
-      await loadEvents();
-      setNotice(`Event created. Open it to manage images/videos. Event ID: ${data.event.id}`);
+      setForm(emptyForm)
+      await loadEvents()
+      setNotice('Event created. Open it to manage images and videos.')
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : 'Could not create event.');
+      setNotice(error instanceof Error ? error.message : 'Could not create event.')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
   }
 
@@ -124,11 +218,11 @@ export default function EventsPage() {
         body: JSON.stringify({
           is_archived: !eventItem.is_archived,
         }),
-      });
+      })
 
-      await loadEvents();
+      await loadEvents()
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : 'Could not update archive status.');
+      setNotice(error instanceof Error ? error.message : 'Could not update archive status.')
     }
   }
 
@@ -139,16 +233,16 @@ export default function EventsPage() {
         body: JSON.stringify({
           is_pinned: !eventItem.is_pinned,
         }),
-      });
+      })
 
-      await loadEvents();
+      await loadEvents()
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : 'Could not update pin status.');
+      setNotice(error instanceof Error ? error.message : 'Could not update pin status.')
     }
   }
 
   async function saveNormalOrder(nextEvents: EventItem[]) {
-    setEvents(nextEvents);
+    setEvents(nextEvents)
 
     try {
       const data = await adminJson<EventListResponse>('/api/admin/events/reorder', {
@@ -156,12 +250,12 @@ export default function EventsPage() {
         body: JSON.stringify({
           ids: nextEvents.map((eventItem) => eventItem.id),
         }),
-      });
+      })
 
-      setEvents(data.events || []);
+      setEvents(data.events || [])
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : 'Could not reorder events.');
-      await loadEvents();
+      setNotice(error instanceof Error ? error.message : 'Could not reorder events.')
+      await loadEvents()
     }
   }
 
@@ -172,35 +266,44 @@ export default function EventsPage() {
         body: JSON.stringify({
           ids: nextPinnedEvents.map((eventItem) => eventItem.id),
         }),
-      });
+      })
 
-      setEvents(data.events || []);
+      setEvents(data.events || [])
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : 'Could not reorder pinned events.');
-      await loadEvents();
+      setNotice(error instanceof Error ? error.message : 'Could not reorder pinned events.')
+      await loadEvents()
     }
   }
 
   if (loading) {
-    return <p className="text-sm text-slate-300">Loading events...</p>;
+    return <LoadingState />
   }
 
   return (
     <div className="space-y-6">
       {notice && (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
+        <div className="rounded-[1.5rem] border border-[hsl(var(--border-soft))] bg-white p-4 text-sm font-semibold leading-6 text-[hsl(var(--text-main))] shadow-sm">
           {notice}
         </div>
       )}
 
-      <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-        <h1 className="text-2xl font-bold">Events</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Create events with a cover image and at least one event image. Open an event to manage
-          metadata, images, videos, archive, pin, and ordering.
-        </p>
+      <section className="overflow-hidden rounded-[2rem] border border-[hsl(var(--border-soft))] bg-white shadow-xl">
+        <div className="border-b border-[hsl(var(--border-soft))] bg-[hsl(var(--brand-soft))] p-6 sm:p-8">
+          <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[hsl(var(--brand))]">
+            Public events
+          </p>
 
-        <form onSubmit={createEvent} className="mt-6 grid gap-5 md:grid-cols-2">
+          <h1 className="font-display mt-2 text-3xl font-black tracking-tight text-[hsl(var(--text-main))]">
+            Events
+          </h1>
+
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[hsl(var(--text-muted))]">
+            Create events with a cover image, event gallery image, and optional YouTube videos.
+            Open an event later to manage all images, videos, archive, pin, and ordering.
+          </p>
+        </div>
+
+        <form onSubmit={createEvent} className="grid gap-5 p-6 sm:p-8 md:grid-cols-2">
           <TextInput
             label="Title"
             value={form.title}
@@ -262,11 +365,14 @@ export default function EventsPage() {
               label="YouTube URLs, one per line"
               value={form.youtube_urls_text}
               rows={3}
+              placeholder="https://www.youtube.com/watch?v=..."
               onChange={(value) => setForm({ ...form, youtube_urls_text: value })}
             />
           </div>
 
-          <div className="md:col-span-2">
+          <YouTubePreviewGrid urls={youtubePreviewUrls} />
+
+          <div className="border-t border-[hsl(var(--border-soft))] pt-6 md:col-span-2">
             <AdminButton type="submit" disabled={saving}>
               {saving ? 'Creating...' : 'Create event'}
             </AdminButton>
@@ -274,31 +380,44 @@ export default function EventsPage() {
         </form>
       </section>
 
-      <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+      <section className="rounded-[2rem] border border-[hsl(var(--border-soft))] bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-xl font-bold">Pinned event order</h2>
-            <p className="mt-1 text-sm text-slate-400">Maximum 10 events can be pinned.</p>
+            <h2 className="font-display text-2xl font-black tracking-tight text-[hsl(var(--text-main))]">
+              Pinned event order
+            </h2>
+
+            <p className="mt-2 text-sm leading-7 text-[hsl(var(--text-muted))]">
+              Maximum 10 events can be pinned on the public website.
+            </p>
           </div>
 
           <StatusBadge tone="blue">{pinnedEvents.length}/10 pinned</StatusBadge>
         </div>
 
         <div className="mt-5 space-y-3">
-          {pinnedEvents.length === 0 && (
-            <p className="rounded-2xl border border-white/10 bg-slate-900 p-4 text-sm text-slate-400">
-              No pinned events yet.
-            </p>
-          )}
+          {pinnedEvents.length === 0 && <EmptyState>No pinned events yet.</EmptyState>}
 
           {pinnedEvents.map((eventItem, index) => (
-            <div key={eventItem.id} className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-slate-900 p-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="font-semibold">{eventItem.title}</p>
-                <p className="mt-1 text-xs text-slate-500">{eventItem.event_date}</p>
+            <div
+              key={eventItem.id}
+              className="flex flex-col gap-4 rounded-[1.5rem] border border-[hsl(var(--border-soft))] bg-[hsl(var(--surface-soft))] p-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex min-w-0 items-center gap-4">
+                <EventCoverThumb eventItem={eventItem} />
+
+                <div className="min-w-0">
+                  <p className="font-display text-lg font-black text-[hsl(var(--text-main))]">
+                    {eventItem.title}
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-[hsl(var(--text-muted))]">
+                    {eventItem.event_date} • Position {index + 1}
+                  </p>
+                </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <AdminButton
                   variant="secondary"
                   disabled={index === 0}
@@ -320,69 +439,98 @@ export default function EventsPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-        <h2 className="text-xl font-bold">All events</h2>
+      <section className="rounded-[2rem] border border-[hsl(var(--border-soft))] bg-white p-5 shadow-sm sm:p-6">
+        <h2 className="font-display text-2xl font-black tracking-tight text-[hsl(var(--text-main))]">
+          All events
+        </h2>
 
-        <div className="mt-5 divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10">
-          {events.length === 0 && <p className="p-4 text-sm text-slate-400">No events yet.</p>}
+        <p className="mt-2 text-sm leading-7 text-[hsl(var(--text-muted))]">
+          Open an event to manage all images and embedded YouTube videos.
+        </p>
+
+        <div className="mt-5 space-y-3">
+          {events.length === 0 && <EmptyState>No events yet.</EmptyState>}
 
           {events.map((eventItem, index) => (
-            <div key={eventItem.id} className="grid gap-4 p-4 xl:grid-cols-[1fr_auto] xl:items-center">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-semibold">{eventItem.title}</h3>
-                  {eventItem.is_pinned && <StatusBadge tone="green">Pinned</StatusBadge>}
-                  {eventItem.is_archived && <StatusBadge tone="red">Archived</StatusBadge>}
+            <div
+              key={eventItem.id}
+              className="rounded-[1.5rem] border border-[hsl(var(--border-soft))] bg-[hsl(var(--surface-soft))] p-4 transition hover:border-[hsl(var(--brand)_/_0.35)] hover:bg-white"
+            >
+              <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-center">
+                <div className="flex min-w-0 items-start gap-4">
+                  <EventCoverThumb eventItem={eventItem} />
+
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-display text-lg font-black text-[hsl(var(--text-main))]">
+                        {eventItem.title}
+                      </h3>
+
+                      {eventItem.is_pinned && <StatusBadge tone="green">Pinned</StatusBadge>}
+                      {eventItem.is_archived && <StatusBadge tone="red">Archived</StatusBadge>}
+                    </div>
+
+                    <p className="mt-1 text-sm font-semibold text-[hsl(var(--text-muted))]">
+                      {eventItem.event_date} • {eventItem.category} • Display order {index + 1}
+                    </p>
+
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {eventItem.location_tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[hsl(var(--text-muted))]"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
-                <p className="mt-1 text-sm text-slate-400">
-                  {eventItem.event_date} • {eventItem.category}
-                </p>
-              </div>
+                <div className="flex flex-wrap gap-2">
+                  <AdminButton
+                    variant="secondary"
+                    disabled={index === 0}
+                    onClick={() => saveNormalOrder(moveItemById(events, eventItem.id, 'up'))}
+                  >
+                    Up
+                  </AdminButton>
 
-              <div className="flex flex-wrap gap-2">
-                <AdminButton
-                  variant="secondary"
-                  disabled={index === 0}
-                  onClick={() => saveNormalOrder(moveItemById(events, eventItem.id, 'up'))}
-                >
-                  Up
-                </AdminButton>
+                  <AdminButton
+                    variant="secondary"
+                    disabled={index === events.length - 1}
+                    onClick={() => saveNormalOrder(moveItemById(events, eventItem.id, 'down'))}
+                  >
+                    Down
+                  </AdminButton>
 
-                <AdminButton
-                  variant="secondary"
-                  disabled={index === events.length - 1}
-                  onClick={() => saveNormalOrder(moveItemById(events, eventItem.id, 'down'))}
-                >
-                  Down
-                </AdminButton>
+                  <Link
+                    href={`/dashboard/events/${eventItem.id}`}
+                    className="inline-flex w-full items-center justify-center rounded-full border border-[hsl(var(--border-soft))] bg-white px-5 py-3 text-sm font-black text-[hsl(var(--text-main))] shadow-sm transition hover:bg-[hsl(var(--brand-soft))] sm:w-fit"
+                  >
+                    Open
+                  </Link>
 
-                <Link
-                  href={`/dashboard/events/${eventItem.id}`}
-                  className="rounded-xl border border-white/10 bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-                >
-                  Open
-                </Link>
+                  <AdminButton
+                    variant="secondary"
+                    disabled={eventItem.is_archived}
+                    onClick={() => togglePin(eventItem)}
+                  >
+                    {eventItem.is_pinned ? 'Unpin' : 'Pin'}
+                  </AdminButton>
 
-                <AdminButton
-                  variant="secondary"
-                  disabled={eventItem.is_archived}
-                  onClick={() => togglePin(eventItem)}
-                >
-                  {eventItem.is_pinned ? 'Unpin' : 'Pin'}
-                </AdminButton>
-
-                <AdminButton
-                  variant={eventItem.is_archived ? 'secondary' : 'danger'}
-                  onClick={() => toggleArchive(eventItem)}
-                >
-                  {eventItem.is_archived ? 'Unarchive' : 'Archive'}
-                </AdminButton>
+                  <AdminButton
+                    variant={eventItem.is_archived ? 'secondary' : 'danger'}
+                    onClick={() => toggleArchive(eventItem)}
+                  >
+                    {eventItem.is_archived ? 'Unarchive' : 'Archive'}
+                  </AdminButton>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </section>
     </div>
-  );
+  )
 }

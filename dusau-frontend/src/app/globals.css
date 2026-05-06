@@ -3,9 +3,50 @@
 @tailwind utilities;
 
 :root {
-  --background: #050816;
-  --foreground: #edf2ff;
-  --muted: #94a3b8;
+  color-scheme: light;
+
+  --app-bg: 38 48% 96%;
+  --app-bg-soft: 42 42% 93%;
+  --surface: 0 0% 100%;
+  --surface-soft: 38 45% 98%;
+
+  --text-main: 222 42% 13%;
+  --text-muted: 218 16% 42%;
+  --text-soft: 218 14% 56%;
+
+  --border-soft: 34 25% 84%;
+  --border-strong: 34 24% 76%;
+
+  --brand: 160 72% 28%;
+  --brand-hover: 160 78% 22%;
+  --brand-soft: 158 55% 93%;
+
+  --accent: 33 82% 50%;
+  --accent-soft: 35 92% 93%;
+
+  --danger: 0 72% 50%;
+
+  /* shadcn/tailwind compatibility */
+  --background: 38 48% 96%;
+  --foreground: 222 42% 13%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 42% 13%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 42% 13%;
+  --primary: 160 72% 28%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 42 42% 93%;
+  --secondary-foreground: 222 42% 13%;
+  --muted: 42 42% 93%;
+  --muted-foreground: 218 16% 42%;
+  --accent-shadcn: 158 55% 93%;
+  --accent-foreground: 160 72% 28%;
+  --destructive: 0 72% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 34 25% 84%;
+  --input: 34 25% 84%;
+  --ring: 160 72% 28%;
+  --radius: 1rem;
 }
 
 * {
@@ -13,31 +54,53 @@
 }
 
 html {
+  min-height: 100%;
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+  background: hsl(var(--app-bg));
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border-strong)) transparent;
+}
+
+html::-webkit-scrollbar {
+  width: 10px;
+}
+
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: hsl(var(--border-strong));
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
 }
 
 body {
   min-height: 100vh;
-  color: var(--foreground);
+  color: hsl(var(--text-main));
   background:
-    radial-gradient(circle at top left, rgba(34, 197, 94, 0.14), transparent 30%),
-    radial-gradient(circle at top right, rgba(239, 68, 68, 0.14), transparent 32%),
-    radial-gradient(circle at 25% 80%, rgba(56, 189, 248, 0.08), transparent 25%),
-    var(--background);
-  font-family: var(--font-sans), system-ui, sans-serif;
+    radial-gradient(circle at 8% 0%, hsl(154 52% 90%) 0, transparent 28rem),
+    radial-gradient(circle at 92% 4%, hsl(34 90% 90%) 0, transparent 24rem),
+    linear-gradient(180deg, hsl(42 54% 97%) 0%, hsl(var(--app-bg)) 42%, hsl(42 40% 94%) 100%);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 body::before {
   content: '';
   position: fixed;
   inset: 0;
+  z-index: -1;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: radial-gradient(circle at center, black, transparent 88%);
-  opacity: 0.35;
+    linear-gradient(hsl(var(--text-main) / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--text-main) / 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+  opacity: 0.32;
 }
 
 a {
@@ -45,9 +108,20 @@ a {
   text-decoration: none;
 }
 
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
 ::selection {
-  background: rgba(34, 197, 94, 0.3);
-  color: white;
+  background: hsl(var(--brand) / 0.18);
+  color: hsl(var(--text-main));
+}
+
+@layer base {
+  img {
+    max-width: 100%;
+  }
 }
 
 @layer utilities {
@@ -56,45 +130,118 @@ a {
   }
 
   .page-shell {
-    @apply relative overflow-x-hidden pb-16;
+    @apply relative min-h-screen overflow-x-hidden pb-14;
   }
 
   .section-shell {
-    @apply relative py-16 sm:py-20;
+    @apply relative py-10 sm:py-14 lg:py-16;
   }
 
   .font-display {
-    font-family: var(--font-display), system-ui, sans-serif;
+    font-family: var(--font-display), var(--font-sans), Arial, Helvetica, sans-serif;
   }
 
-  .glass {
-    @apply rounded-3xl border border-white/10 bg-white/[0.05] backdrop-blur-xl;
+  .surface-card {
+    border-radius: 1.75rem;
+    border: 1px solid hsl(var(--border-soft));
+    background: hsl(var(--surface));
+    box-shadow: 0 18px 60px -44px hsl(222 42% 13% / 0.55);
   }
 
+  .soft-panel {
+    border-radius: 1.5rem;
+    border: 1px solid hsl(var(--border-soft));
+    background: hsl(var(--surface-soft));
+  }
+
+  .glass,
   .glass-strong {
-    @apply rounded-[2rem] border border-white/10 bg-white/[0.06] backdrop-blur-2xl;
+    border-radius: 1.75rem;
+    border: 1px solid hsl(var(--border-soft));
+    background: hsl(var(--surface));
+    box-shadow: 0 18px 60px -44px hsl(222 42% 13% / 0.5);
   }
 
   .pill {
-    @apply inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em] text-slate-300;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--brand) / 0.18);
+    background: hsl(var(--brand-soft));
+    padding: 0.35rem 0.8rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: hsl(var(--brand));
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-full border border-green-400/40 bg-green-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_18px_60px_-15px_rgba(34,197,94,0.45)] transition hover:-translate-y-0.5 hover:bg-green-300;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: hsl(var(--brand));
+    padding: 0.8rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 18px 42px -26px hsl(var(--brand) / 0.78);
+    transition:
+      transform 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    background: hsl(var(--brand-hover));
+    box-shadow: 0 22px 52px -28px hsl(var(--brand) / 0.88);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/10;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border-soft));
+    background: hsl(var(--surface));
+    padding: 0.8rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: hsl(var(--text-main));
+    box-shadow: 0 14px 36px -30px hsl(222 42% 13% / 0.45);
+    transition:
+      transform 180ms ease,
+      border-color 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .btn-secondary:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--brand) / 0.35);
+    background: hsl(var(--brand-soft));
+    box-shadow: 0 18px 44px -32px hsl(222 42% 13% / 0.5);
   }
 
   .text-gradient {
-    @apply bg-gradient-to-r from-white via-slate-200 to-green-300 bg-clip-text text-transparent;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--text-main)) 0%,
+      hsl(var(--brand)) 48%,
+      hsl(var(--accent)) 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
   }
 
   .hero-grid {
     background-image:
-      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      linear-gradient(hsl(var(--text-main) / 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--text-main) / 0.045) 1px, transparent 1px);
     background-size: 80px 80px;
   }
 
@@ -105,6 +252,7 @@ a {
 
   .masonry-item {
     break-inside: avoid;
+    margin-bottom: 1rem;
   }
 
   @screen md {

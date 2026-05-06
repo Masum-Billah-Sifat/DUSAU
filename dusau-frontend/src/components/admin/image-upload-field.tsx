@@ -1,60 +1,103 @@
-'use client';
+'use client'
 
-import { ChangeEvent, useState } from 'react';
-import { uploadAdminImage } from '@/lib/admin/api';
+import { ChangeEvent, useEffect, useState } from 'react'
+import { uploadAdminImage } from '@/lib/admin/api'
+import { toMediaUrl } from '@/lib/public/media'
 
 type ImageUploadFieldProps = {
-  label: string;
-  value: string;
-  onChange: (path: string) => void;
-};
+  label: string
+  value: string
+  onChange: (path: string) => void
+}
 
 export function ImageUploadField({ label, value, onChange }: ImageUploadFieldProps) {
-  const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (localPreviewUrl) {
+        URL.revokeObjectURL(localPreviewUrl)
+      }
+    }
+  }, [localPreviewUrl])
 
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const file = event.target.files?.[0]
+    if (!file) return
 
-    setUploading(true);
-    setMessage(null);
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl)
+    }
+
+    const previewUrl = URL.createObjectURL(file)
+    setLocalPreviewUrl(previewUrl)
+
+    setUploading(true)
+    setMessage(null)
 
     try {
-      const data = await uploadAdminImage(file);
-      onChange(data.image.path);
-      setMessage('Image uploaded.');
+      const data = await uploadAdminImage(file)
+      onChange(data.image.path)
+      setMessage('Image uploaded successfully.')
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Image upload failed.');
+      setMessage(error instanceof Error ? error.message : 'Image upload failed.')
     } finally {
-      setUploading(false);
-      event.target.value = '';
+      setUploading(false)
+      event.target.value = ''
     }
   }
 
+  const previewSrc = localPreviewUrl || (value ? toMediaUrl(value) : '')
+
   return (
-    <label className="block">
-      <span className="text-sm font-medium text-slate-200">{label}</span>
+    <div className="block">
+      <label className="block">
+        <span className="text-sm font-bold text-[hsl(var(--text-main))]">
+          {label}
+        </span>
 
-      <input
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        disabled={uploading}
-        onChange={handleFileChange}
-        className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none file:mr-4 file:rounded-lg file:border-0 file:bg-white file:px-4 file:py-2 file:font-semibold file:text-slate-950 hover:file:bg-slate-200 disabled:opacity-60"
-      />
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          disabled={uploading}
+          onChange={handleFileChange}
+          className="mt-2 w-full rounded-2xl border border-[hsl(var(--border-soft))] bg-[hsl(var(--surface-soft))] px-4 py-3 text-sm font-semibold text-[hsl(var(--text-main))] outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-[hsl(var(--brand))] file:px-4 file:py-2 file:text-sm file:font-black file:text-white hover:file:bg-[hsl(var(--brand-hover))] disabled:cursor-not-allowed disabled:opacity-60"
+        />
+      </label>
 
-      <p className="mt-2 text-xs text-slate-400">
-        {uploading ? 'Uploading...' : 'Allowed: JPG, PNG, WEBP. Max size depends on backend limit.'}
+      <p className="mt-2 text-xs font-semibold leading-6 text-[hsl(var(--text-muted))]">
+        {uploading
+          ? 'Uploading image...'
+          : 'Allowed: JPG, PNG, WEBP. Use a clear, high-quality image.'}
       </p>
 
-      {value && (
-        <p className="mt-2 break-all rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-xs text-slate-300">
-          Current path: {value}
-        </p>
+      {previewSrc && (
+        <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-[hsl(var(--border-soft))] bg-white p-3 shadow-sm">
+          <div className="relative overflow-hidden rounded-[1.1rem] bg-[hsl(var(--app-bg-soft))]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={previewSrc}
+              alt={`${label} preview`}
+              className="h-64 w-full object-cover"
+            />
+          </div>
+        </div>
       )}
 
-      {message && <p className="mt-2 text-xs text-slate-300">{message}</p>}
-    </label>
-  );
+      {message && (
+        <p
+          className={`mt-3 rounded-2xl px-4 py-3 text-xs font-bold leading-6 ${
+            message.toLowerCase().includes('failed') ||
+            message.toLowerCase().includes('error')
+              ? 'border border-red-200 bg-red-50 text-red-700'
+              : 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+          }`}
+        >
+          {message}
+        </p>
+      )}
+    </div>
+  )
 }

@@ -1,154 +1,128 @@
-// 'use client'
+"use client";
 
-// import Image from 'next/image'
-// import Link from 'next/link'
-// import { FadeIn } from '@/components/ui'
-// import { useLocalizedContent } from '@/hooks/use-locallized-content'
-
-// export default function Hero() {
-//   const { content } = useLocalizedContent()
-//   const highlightEvent = content.events[0]
-
-//   return (
-//     <section className="section-shell pt-10 sm:pt-14">
-//       <div className="container-app grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-//         <FadeIn>
-//           <span className="pill">{content.hero.eyebrow}</span>
-
-//           <h1 className="font-display mt-6 text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-//             {content.hero.titleLead}{' '}
-//             <span className="text-gradient">{content.siteConfig.name}</span>
-//           </h1>
-
-//           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-//             {content.hero.description}
-//           </p>
-
-//           <div className="mt-8 flex flex-wrap gap-4">
-//             <Link href="#recent-events" className="btn-primary">
-//               {content.hero.primaryCta}
-//             </Link>
-//             <Link href="/admin-demo" className="btn-secondary">
-//               {content.hero.secondaryCta}
-//             </Link>
-//           </div>
-
-//           <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-//             {content.homeStats.map((item) => (
-//               <div key={item.label} className="glass p-5">
-//                 <p className="font-display text-2xl font-semibold text-white">
-//                   {item.value}
-//                 </p>
-//                 <p className="mt-2 text-sm text-slate-400">{item.label}</p>
-//               </div>
-//             ))}
-//           </div>
-//         </FadeIn>
-
-//         <FadeIn delay={0.15}>
-//           <div className="relative">
-//             <div className="glass-strong relative overflow-hidden p-3 sm:p-4">
-//               <div className="relative h-[380px] overflow-hidden rounded-[1.75rem] sm:h-[520px]">
-//                 <Image
-//                   src={content.siteConfig.heroImage}
-//                   alt={content.siteConfig.name}
-//                   fill
-//                   priority
-//                   className="object-cover"
-//                   sizes="(max-width: 1024px) 100vw, 50vw"
-//                 />
-//                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
-
-//                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-//                   <span className="pill">{highlightEvent.category}</span>
-//                   <h3 className="font-display mt-4 text-2xl font-semibold text-white sm:text-3xl">
-//                     {highlightEvent.title}
-//                   </h3>
-//                   <p className="mt-3 max-w-xl text-sm leading-7 text-slate-200 sm:text-base">
-//                     {highlightEvent.description}
-//                   </p>
-//                 </div>
-//               </div>
-//             </div>
-
-//           </div>
-//         </FadeIn>
-//       </div>
-//     </section>
-//   )
-// }
-
-'use client'
-
-import Image from 'next/image'
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { FadeIn } from '@/components/ui'
-import { getPublicOrganization, type PublicOrganization } from '@/lib/public/api'
-import { toMediaUrl } from '@/lib/public/media'
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { FadeIn } from "@/components/ui";
+import {
+  getPublicOrganization,
+  type PublicOrganization,
+} from "@/lib/public/api";
+import { toMediaUrl } from "@/lib/public/media";
 
 export default function Hero() {
-  const [org, setOrg] = useState<PublicOrganization | null>(null)
+  const [org, setOrg] = useState<PublicOrganization | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
+
     async function loadOrg() {
       try {
-        const data = await getPublicOrganization()
-        setOrg(data.organization)
+        const data = await getPublicOrganization();
+        if (active) setOrg(data.organization);
       } catch {
-        setOrg(null)
+        if (active) setOrg(null);
+      } finally {
+        if (active) setLoading(false);
       }
     }
 
-    loadOrg()
-  }, [])
+    loadOrg();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="relative overflow-hidden pt-24 sm:pt-28">
+        <div className="container-app py-10 sm:py-14">
+          <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-[hsl(var(--border-soft))] bg-[hsl(var(--app-bg-soft))] shadow-xl sm:min-h-[640px] lg:min-h-[700px]">
+            <div className="absolute inset-0 animate-pulse bg-[hsl(var(--app-bg-soft))]" />
+
+            <div className="absolute inset-x-5 bottom-8 z-10 sm:inset-x-8 sm:bottom-12 lg:left-10 lg:right-auto lg:max-w-4xl">
+              <div className="h-4 w-24 animate-pulse rounded-full bg-white/70" />
+              <div className="mt-5 h-12 w-5/6 animate-pulse rounded-full bg-white/70" />
+              <div className="mt-4 h-4 w-full animate-pulse rounded-full bg-white/60" />
+              <div className="mt-3 h-4 w-2/3 animate-pulse rounded-full bg-white/60" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="relative min-h-[760px] overflow-hidden pt-28">
-      {org?.cover_image_path && (
-        <Image
-          src={toMediaUrl(org.cover_image_path)}
-          alt={org.cover_title || 'DUSAU'}
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-      )}
+    <section className="relative overflow-hidden pt-24 sm:pt-28">
+      <div className="container-app py-10 sm:py-14">
+        <FadeIn>
+          <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-[hsl(var(--border-soft))] bg-[hsl(var(--app-bg-soft))] shadow-xl sm:min-h-[640px] lg:min-h-[700px]">
+            {org?.cover_image_path ? (
+              <Image
+                src={toMediaUrl(org.cover_image_path)}
+                alt={org.cover_title || "DUSAU"}
+                fill
+                priority
+                className="object-cover object-center brightness-[1.04] saturate-[1.05]"
+                sizes="100vw"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--brand)/0.22),transparent_26rem),radial-gradient(circle_at_top_right,hsl(var(--accent)/0.24),transparent_24rem),hsl(var(--app-bg-soft))]" />
+            )}
 
-      <div className="absolute inset-0 bg-slate-950/75" />
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/80 to-slate-950" />
+            {/* image stays visible, only softened enough for text readability
+            <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/22 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" /> */}
 
-      <div className="container-app relative z-10 flex min-h-[620px] items-center">
-        <FadeIn className="max-w-4xl">
-          <span className="pill">DUSAU</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-black/72 via-black/38 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/18 to-transparent" />
 
-          <h1 className="font-display mt-6 text-5xl font-semibold leading-tight text-white md:text-7xl">
-            {org?.cover_title || 'Dhaka University Statistics Alumni Association'}
-          </h1>
-
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-200 md:text-xl">
-            {org?.cover_description ||
-              'A connected community of statistics graduates, students, mentors, and professionals.'}
-          </p>
-
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Link href="/events" className="btn-primary">
-              Explore Events
-            </Link>
-            <Link href="/contact" className="btn-secondary">
-              Contact Us
-            </Link>
-          </div>
-
-          {(org?.public_email || org?.public_phone) && (
-            <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-300">
-              {org.public_email && <span className="pill">{org.public_email}</span>}
-              {org.public_phone && <span className="pill">{org.public_phone}</span>}
+            <div className="absolute left-5 top-5 z-10 sm:left-8 sm:top-8">
+              <span className="inline-flex rounded-full border border-white/45 bg-black/20 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white shadow-sm backdrop-blur-sm">
+                DUSAU
+              </span>
             </div>
-          )}
+
+            <div className="absolute inset-x-5 bottom-8 z-10 sm:inset-x-8 sm:bottom-12 lg:left-10 lg:right-auto lg:max-w-4xl">
+              <h1 className="font-display max-w-4xl text-4xl font-black leading-tight tracking-tight !text-white [text-shadow:0_4px_28px_rgba(0,0,0,0.95),0_1px_2px_rgba(0,0,0,1)] sm:text-5xl lg:text-7xl">
+                {org?.cover_title ||
+                  "Dhaka University Statistics Alumni Association"}
+              </h1>
+              {/* <h1 className="font-display max-w-4xl text-4xl font-black leading-tight tracking-tight text-white drop-shadow-[0_4px_22px_rgba(0,0,0,0.75)] sm:text-5xl lg:text-7xl">
+                {org?.cover_title ||
+                  "Dhaka University Statistics Alumni Association"}
+              </h1> */}
+
+              {/* <p className="mt-5 max-w-3xl text-base font-semibold leading-8 text-white/92 drop-shadow-[0_3px_16px_rgba(0,0,0,0.75)] sm:text-lg lg:text-xl">
+                {org?.cover_description ||
+                  "A connected community of statistics graduates, students, mentors, and professionals."}
+              </p> */}
+
+              <p className="mt-5 max-w-3xl text-base font-bold leading-8 !text-white [text-shadow:0_3px_20px_rgba(0,0,0,0.95),0_1px_2px_rgba(0,0,0,1)] sm:text-lg lg:text-xl">
+                {org?.cover_description ||
+                  "A connected community of statistics graduates, students, mentors, and professionals."}
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Link
+                  href="/events"
+                  className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-black text-[hsl(var(--text-main))] shadow-lg transition hover:bg-[hsl(var(--brand-soft))] sm:w-fit"
+                >
+                  Explore Events
+                </Link>
+
+                <Link
+                  href="/contact"
+                  className="inline-flex w-full items-center justify-center rounded-full border border-white/55 bg-white/15 px-5 py-3 text-sm font-black text-white shadow-lg backdrop-blur-sm transition hover:bg-white/25 sm:w-fit"
+                >
+                  Contact Us
+                </Link>
+              </div>
+            </div>
+          </div>
         </FadeIn>
       </div>
     </section>
-  )
+  );
 }
