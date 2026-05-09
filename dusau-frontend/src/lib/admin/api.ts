@@ -28,18 +28,34 @@ export async function adminJson<T>(url: string, options: RequestInit = {}): Prom
   return data as T;
 }
 
+// export async function uploadAdminImage(file: File) {
+//   const formData = new FormData();
+//   formData.append('image', file);
+
+//   return adminJson<{
+//     ok: boolean;
+//     image: {
+//       path: string;
+//       public_url: string;
+//     };
+//   }>('/api/admin/uploads/image', {
+//     method: 'POST',
+//     body: formData,
+//   });
+// }
+
 export async function uploadAdminImage(file: File) {
-  const formData = new FormData();
-  formData.append('image', file);
+  const formData = new FormData()
+  formData.append('image', file)
 
   return adminJson<{
-    ok: boolean;
+    ok: boolean
     image: {
-      path: string;
-      public_url: string;
-    };
+      path: string
+      public_url: string
+    }
   }>('/api/admin/uploads/image', {
     method: 'POST',
     body: formData,
-  });
+  })
 }
